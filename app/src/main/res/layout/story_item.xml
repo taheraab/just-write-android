@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:padding="5dp" android:orientation="vertical">
+    android:padding="5dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Date"
+        android:id="@+id/storyModifyDate"
+        android:layout_alignParentEnd="true"
+        />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/storyModifyDate"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Large Text"
         android:id="@+id/storyTitle" />
+
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
+        android:layout_below="@id/storyTitle"
         android:id="@+id/storyDesc" />
-</LinearLayout>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/storyDesc"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/storyEditBtn"
+        android:onClick="launchStoryActivity"
+        android:visibility="gone"
+        android:src="@drawable/ic_action_edit"
+        />
+</RelativeLayout>

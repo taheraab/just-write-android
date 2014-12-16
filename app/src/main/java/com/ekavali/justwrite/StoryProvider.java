@@ -78,7 +78,7 @@ public class StoryProvider extends ContentProvider {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         switch (sURIMatcher.match(uri)) {
             case STORIES: //insert new story record
-                Long now = Long.valueOf(System.currentTimeMillis());
+                long now = System.currentTimeMillis();
                 values.put(StoryContract.COLUMN_NAME_CREATE_DATE, now);
                 values.put(StoryContract.COLUMN_NAME_MODIFY_DATE, now);
                 long newRowId = db.insert(StoryContract.Story.TABLE_NAME, null, values);
@@ -110,6 +110,10 @@ public class StoryProvider extends ContentProvider {
                         null,
                         null,
                         sortOrder);
+                //cursor.moveToFirst();
+                for (int i = 0; i < cursor.getColumnCount(); i++) {
+                    Log.v(TAG, "columns: " + cursor.getColumnName(i));
+                }
                 return cursor;
             default:
                 throw new IllegalArgumentException("Uri not valid: " + uri);

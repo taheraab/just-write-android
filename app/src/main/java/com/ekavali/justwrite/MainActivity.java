@@ -11,6 +11,9 @@ import android.support.v7.widget.SearchView;
 import android.content.Context;
 import android.content.Intent;
 import android.content.CursorLoader;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
 import android.content.ContentValues;
@@ -22,13 +25,16 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.ListView;
 import android.text.TextUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = "MainActivity";
     private SimpleCursorAdapter mAdapter;
     private String mCurFilter = null;
     private MyLoaderCallbacks mLoaderCallbacks;
-
+    private View mCurStoryItem = null;
 
     //Object to handle callbacks from Loader
     private class MyLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor>
@@ -46,7 +52,8 @@ public class MainActivity extends ActionBarActivity {
             String[] projection = {
                     StoryContract.Story._ID,
                     StoryContract.Story.COLUMN_NAME_TITLE,
-                    StoryContract.Story.COLUMN_NAME_DESCRIPTION};
+                    StoryContract.Story.COLUMN_NAME_DESCRIPTION,
+                    StoryContract.COLUMN_NAME_MODIFY_DATE};
             String selection = null;
             String[] selectionArgs = null;
             if (mCurFilter != null) {
@@ -100,6 +107,29 @@ public class MainActivity extends ActionBarActivity {
 
     };
 
+    /**
+     * Custom view binder for story list
+     */
+    private SimpleCursorAdapter.ViewBinder mViewBinder = new SimpleCursorAdapter.ViewBinder() {
+        /**
+         * Provide custom bindings for story list
+         * @param view
+         * @param cursor
+         * @param columnIndex
+         * @return
+         */
+         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+          if (cursor.getColumnName(columnIndex).equals(StoryContract.COLUMN_NAME_MODIFY_DATE)){
+              SimpleDateFormat df = new SimpleDateFormat("d MMM yyyy, h:mm a");
+              TextView textView = (TextView) view;
+              String date = df.format(new Date(cursor.getLong(columnIndex)));
+              textView.setText(date);
+              Log.v(TAG, date);
+              return true;
+          }
+          return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,16 +143,29 @@ public class MainActivity extends ActionBarActivity {
 
         // For the cursor adapter, specify which columns go into which views
         String[] fromColumns = {StoryContract.Story.COLUMN_NAME_TITLE,
-                StoryContract.Story.COLUMN_NAME_DESCRIPTION};
-        int[] toViews = {R.id.storyTitle, R.id.storyDesc}; // The TextView in simple_list_item_2
+                StoryContract.Story.COLUMN_NAME_DESCRIPTION, StoryContract.COLUMN_NAME_MODIFY_DATE};
+        int[] toViews = {R.id.storyTitle, R.id.storyDesc, R.id.storyModifyDate}; // The TextView in simple_list_item_2
 
         // Create an empty adapter we will use to display the loaded data.
         // We pass null for the cursor, then update it in onLoadFinished()
         mAdapter = new SimpleCursorAdapter(this,
                 R.layout.story_item, null,
                 fromColumns, toViews, 0);
+        mAdapter.setViewBinder(mViewBinder);
         ListView storyListView = (ListView) findViewById(R.id.storyList);
         storyListView.setAdapter(mAdapter);
+        storyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                if (mCurStoryItem != null) {
+                    mCurStoryItem.findViewById(R.id.storyEditBtn).setVisibility(View.GONE);
+                }
+                view.findViewById(R.id.storyEditBtn).setVisibility(View.VISIBLE);
+                mCurStoryItem = view;
+                //Toggle detail view
+                Log.v(TAG, "id: " + id);
+            }
+        });
 
     }
 
@@ -178,10 +221,19 @@ public class MainActivity extends ActionBarActivity {
      */
     private void addStory() {
         ContentValues values = new ContentValues();
-        values.put(StoryContract.Story.COLUMN_NAME_TITLE, "Story1");
+        values.put(StoryContract.Story.COLUMN_NAME_TITLE, "Story1 long long long long long long long story tilte ");
         values.put(StoryContract.Story.COLUMN_NAME_DESCRIPTION, "Story1 Description");
         Uri newRowUri = getContentResolver().insert(StoryContract.Story.CONTENT_URI, values);
+        Log.v(TAG, "values: " + values);
         Log.v(TAG, "newRowUri: " + newRowUri);
     }
 
+    /**
+     * Called when Edit is clicked on current list item, launch story view
+     * @param view
+     */
+    public void launchStoryActivity(View view) {
+        Log.v(TAG, "Edit clicked");
+
+    }
 }
